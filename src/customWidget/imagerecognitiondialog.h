@@ -19,7 +19,7 @@ public:
     explicit ImageRecognitionDialog(QWidget *parent = nullptr);
     ~ImageRecognitionDialog();
 
-    void setImage(QImage &image)
+    void setImage(const QImage &image)
     {
         *m_image     = image;
         *m_showImage = image;

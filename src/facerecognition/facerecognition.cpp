@@ -18,6 +18,8 @@
 
 #include "facerecognition.h"
 
+#include <opencv2/imgproc/types_c.h>
+
 FaceRecognition::FaceRecognition(QObject *parent) :
     QObject(parent),
     m_cascada(new cv::CascadeClassifier)
@@ -25,7 +27,12 @@ FaceRecognition::FaceRecognition(QObject *parent) :
 
 }
 
-bool FaceRecognition::load()
+FaceRecognition::~FaceRecognition()
+{
+    delete m_cascada;
+}
+
+bool FaceRecognition::load() const
 {
     /* 加载模型 */
     return m_cascada->load("./haarcascade_frontalface_alt.xml");
@@ -39,7 +46,7 @@ void FaceRecognition::start()
                              cv::Size(10, 10), cv::Size(1000, 1000));
 }
 
-QImage FaceRecognition::cvMatToImage(cv::Mat& mat)
+QImage FaceRecognition::cvMatToImage(const cv::Mat& mat)
 {
     // 8-bits unsigned, NO. OF CHANNELS = 1
     if(mat.type() == CV_8UC1)
@@ -94,7 +101,7 @@ cv::Mat FaceRecognition::ImageTocvMat(const QImage &image)
         break;
     case QImage::Format_RGB888:
         mat = cv::Mat(image.height(), image.width(), CV_8UC3, (void*)image.constBits(), static_cast<size_t>(image.bytesPerLine()));
-        //cv::cvtColor(mat, mat, CV_BGR2RGB);
+        cv::cvtColor(mat, mat, CV_BGR2RGB);
         break;
     case QImage::Format_Indexed8:
         mat = cv::Mat(image.height(), image.width(), CV_8UC1, (void*)image.constBits(), static_cast<size_t>(image.bytesPerLine()));
@@ -102,4 +109,3 @@ cv::Mat FaceRecognition::ImageTocvMat(const QImage &image)
     }
     return mat;
 }
-

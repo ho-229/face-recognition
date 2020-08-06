@@ -19,7 +19,7 @@ class CameraRecognitionDialog : public QDialog
 
 public:
     explicit CameraRecognitionDialog(QWidget *parent = nullptr);
-    ~CameraRecognitionDialog();
+    ~CameraRecognitionDialog() Q_DECL_OVERRIDE;
 
 private slots:
     void processFrame();

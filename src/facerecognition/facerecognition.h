@@ -11,17 +11,17 @@ class FaceRecognition : public QObject
     Q_OBJECT
 public:
     explicit FaceRecognition(QObject *parent = nullptr);
-    ~FaceRecognition() {  }
+    ~FaceRecognition();
 
     void setImage(const cv::Mat &image) { m_image = image; }
     void setImage(const QImage  &image) { m_image = ImageTocvMat(image); }
 
-    bool load();
+    bool load() const;
     void start();
 
     std::vector<cv::Rect> faces() const { return m_faces; }
 
-    static QImage cvMatToImage(cv::Mat& mat);
+    static QImage cvMatToImage(const cv::Mat& mat);
     static cv::Mat ImageTocvMat(const QImage &image);
 
 signals:
