@@ -1,5 +1,5 @@
-﻿#ifndef CAMERARECOGNITIONDIALOG_H
-#define CAMERARECOGNITIONDIALOG_H
+﻿#ifndef VIDEORECOGNITIONDIALOG_H
+#define VIDEORECOGNITIONDIALOG_H
 
 #include <QPen>
 #include <QDialog>
@@ -13,13 +13,17 @@ namespace Ui {
 class CameraRecognitionDialog;
 }
 
-class CameraRecognitionDialog : public QDialog
+class VideoRecognitionDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit CameraRecognitionDialog(QWidget *parent = nullptr);
-    ~CameraRecognitionDialog() Q_DECL_OVERRIDE;
+    explicit VideoRecognitionDialog(QWidget *parent = nullptr);
+    ~VideoRecognitionDialog() Q_DECL_OVERRIDE;
+
+    void openVideo(const cv::String& filename, int apiPreference = cv::CAP_ANY);
+
+    void openVideo(int index, int apiPreference = cv::CAP_ANY);
 
 private slots:
     void processFrame();
@@ -36,7 +40,7 @@ private:
     QTimer *m_Timer = nullptr;
     FaceRecognition *m_FaceRecognition = nullptr;
 
-    cv::VideoCapture m_cameraCapture;
+    cv::VideoCapture m_videoCapture;
     cv::Mat m_frame;
 
     std::vector<cv::Rect> m_faces;
@@ -45,4 +49,4 @@ private:
     QImage    m_imageFrame;
 };
 
-#endif // CAMERARECOGNITIONDIALOG_H
+#endif // VIDEORECOGNITIONDIALOG_H

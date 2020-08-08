@@ -29,6 +29,7 @@ signals:
 
 private:
     cv::Mat m_image;
+    cv::Mat m_grayImage;
     cv::CascadeClassifier *m_cascada = nullptr;
 
     std::vector<cv::Rect> m_faces;

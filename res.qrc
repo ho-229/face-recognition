@@ -4,5 +4,6 @@
         <file>images/photo.ico</file>
         <file>images/about.ico</file>
         <file>images/ho229.jpg</file>
+        <file>images/video.ico</file>
     </qresource>
 </RCC>

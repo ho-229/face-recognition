@@ -5,7 +5,7 @@
 
 #include "aboutdialog.h"
 #include "imagerecognitiondialog.h"
-#include "camerarecognitiondialog.h"
+#include "videorecognitiondialog.h"
 
 namespace Ui {
 class MainWidget;
@@ -26,14 +26,17 @@ private slots:
 
     void on_photoBtn_clicked();
 
+
+    void on_videoBtn_clicked();
+
 private:
     Ui::MainWidget *ui;
 
     inline void initUI();
 
     AboutDialog  *m_AboutDialog  = nullptr;
-    ImageRecognitionDialog  *m_ImageRecognitionDialog  = nullptr;
-    CameraRecognitionDialog *m_CameraRecognitionDialog = nullptr;
+    ImageRecognitionDialog *m_ImageRecognitionDialog = nullptr;
+    VideoRecognitionDialog *m_VideoRecognitionDialog = nullptr;
 };
 
 #endif // MAINWIDGET_H

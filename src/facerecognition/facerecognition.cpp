@@ -40,9 +40,8 @@ bool FaceRecognition::load() const
 
 void FaceRecognition::start()
 {
-    cv::Mat grayImage;
-    cvtColor(m_image,grayImage,cv::COLOR_BGR2GRAY); // 转换成灰度图
-    m_cascada->detectMultiScale(grayImage, m_faces, 1.1, 5, cv::CASCADE_DO_ROUGH_SEARCH,
+    cvtColor(m_image,m_grayImage, cv::COLOR_BGR2GRAY); // 转换成灰度图
+    m_cascada->detectMultiScale(m_grayImage, m_faces, 1.1, 5, cv::CASCADE_DO_ROUGH_SEARCH,
                              cv::Size(10, 10), cv::Size(1000, 1000));
 }
 

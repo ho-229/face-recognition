@@ -16,9 +16,10 @@
  * with this program; If not, see <http://www.gnu.org/licenses/>.
  ======================================================================== */
 
-#include "camerarecognitiondialog.h"
+#include "videorecognitiondialog.h"
 #include "ui_camerarecognitiondialog.h"
 
+#include <QDebug>
 #include <QUrl>
 #include <QDir>
 #include <QTimer>
@@ -31,7 +32,7 @@
     #pragma execution_character_set("utf-8")
 #endif
 
-CameraRecognitionDialog::CameraRecognitionDialog(QWidget *parent) :
+VideoRecognitionDialog::VideoRecognitionDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::CameraRecognitionDialog),
     m_Timer(new QTimer(this)),
@@ -39,13 +40,6 @@ CameraRecognitionDialog::CameraRecognitionDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     this->initUI();
-
-    if(!m_cameraCapture.open(0 ,cv::CAP_DSHOW))
-    {
-        QMessageBox::critical(this,"错误","摄像头加载失败");
-        this->close();
-        return;
-    }
 
     if(!m_FaceRecognition->load())
     {
@@ -56,18 +50,42 @@ CameraRecognitionDialog::CameraRecognitionDialog(QWidget *parent) :
 
     m_pen.setWidth(3);
 
-    connect(m_Timer,&QTimer::timeout,this,&CameraRecognitionDialog::processFrame);
-    m_Timer->start(100);
+    connect(m_Timer,&QTimer::timeout,this,&VideoRecognitionDialog::processFrame);
 }
 
-CameraRecognitionDialog::~CameraRecognitionDialog()
+VideoRecognitionDialog::~VideoRecognitionDialog()
 {        
     delete ui;
 }
 
-void CameraRecognitionDialog::processFrame()
+void VideoRecognitionDialog::openVideo(const cv::String &filename, int apiPreference)
 {
-    m_cameraCapture >> m_frame;             // 读取帧
+    qDebug()<<filename.c_str();
+    if(!m_videoCapture.open(filename ,apiPreference))
+    {
+        QMessageBox::critical(this,"错误","视频文件加载失败");
+        this->close();
+        return;
+    }
+    this->setWindowTitle(filename.c_str());
+    m_Timer->start(100);
+}
+
+void VideoRecognitionDialog::openVideo(int index, int apiPreference)
+{
+    if(!m_videoCapture.open(index ,apiPreference))
+    {
+        QMessageBox::critical(this,"错误","摄像头加载失败");
+        this->close();
+        return;
+    }
+    this->setWindowTitle("摄像头 - " + QCameraInfo::defaultCamera().description());
+    m_Timer->start(100);
+}
+
+void VideoRecognitionDialog::processFrame()
+{
+    m_videoCapture >> m_frame;             // 读取帧
     if(!m_frame.empty())
     {
         m_FaceRecognition->setImage(m_frame);
@@ -105,19 +123,19 @@ void CameraRecognitionDialog::processFrame()
     }
 }
 
-void CameraRecognitionDialog::initUI()
+void VideoRecognitionDialog::initUI()
 {
     this->setWindowFlag(Qt::WindowContextHelpButtonHint,false);
-    this->setWindowTitle("摄像头 - " + QCameraInfo::defaultCamera().description());
+    this->setWindowFlag(Qt::MSWindowsFixedSizeDialogHint);
 }
 
-void CameraRecognitionDialog::closeEvent(QCloseEvent *)
+void VideoRecognitionDialog::closeEvent(QCloseEvent *)
 {
     m_Timer->stop();            // 停止QTimer
-    m_cameraCapture.release();  // 关闭摄像头
+    m_videoCapture.release();   // 关闭摄像头
 }
 
-void CameraRecognitionDialog::on_saveToLocalBtn_clicked()
+void VideoRecognitionDialog::on_saveToLocalBtn_clicked()
 {
     if(!m_faces.empty())
     {

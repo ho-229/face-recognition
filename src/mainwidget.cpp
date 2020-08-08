@@ -19,10 +19,8 @@
 #include "mainwidget.h"
 #include "ui_mainwidget.h"
 
-#include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <opencv2/opencv.hpp>
 
 #if _MSC_VER >= 1600
     #pragma execution_character_set("utf-8")
@@ -43,7 +41,7 @@ MainWidget::~MainWidget()
 
 void MainWidget::initUI()
 {
-    this->setFixedSize(this->size());
+    this->setWindowFlag(Qt::MSWindowsFixedSizeDialogHint);
 }
 
 void MainWidget::on_photoBtn_clicked()
@@ -60,7 +58,6 @@ void MainWidget::on_photoBtn_clicked()
         return;
     }
 
-    this->hide();
     m_ImageRecognitionDialog = new ImageRecognitionDialog(this);
     m_ImageRecognitionDialog->setWindowTitle(fileName);
     m_ImageRecognitionDialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -68,17 +65,29 @@ void MainWidget::on_photoBtn_clicked()
     m_ImageRecognitionDialog->recognitionImage();
     m_ImageRecognitionDialog->exec();
     m_ImageRecognitionDialog = nullptr;
-    this->show();
 }
 
 void MainWidget::on_cameraBtn_clicked()
 {
-    this->hide();
-    m_CameraRecognitionDialog = new CameraRecognitionDialog(this);
-    m_CameraRecognitionDialog->setAttribute(Qt::WA_DeleteOnClose);
-    m_CameraRecognitionDialog->exec();
-    m_CameraRecognitionDialog = nullptr;
-    this->show();
+    m_VideoRecognitionDialog = new VideoRecognitionDialog(this);
+    m_VideoRecognitionDialog->setAttribute(Qt::WA_DeleteOnClose);
+    m_VideoRecognitionDialog->openVideo(cv::CAP_ANY ,cv::CAP_DSHOW);
+    m_VideoRecognitionDialog->exec();
+    m_VideoRecognitionDialog = nullptr;
+}
+
+void MainWidget::on_videoBtn_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(this,"选择视频",QDir::homePath(),
+        "视频文件 (*.mp4 *.avi *.gif *.mpg)");
+    if(fileName.isEmpty())
+        return;
+
+    m_VideoRecognitionDialog = new VideoRecognitionDialog(this);
+    m_VideoRecognitionDialog->setAttribute(Qt::WA_DeleteOnClose);
+    m_VideoRecognitionDialog->openVideo(fileName.toStdString());
+    m_VideoRecognitionDialog->exec();
+    m_VideoRecognitionDialog = nullptr;
 }
 
 void MainWidget::on_aboutBtn_clicked()
