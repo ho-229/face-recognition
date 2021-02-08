@@ -19,8 +19,10 @@
 #include "mainwidget.h"
 #include "ui_mainwidget.h"
 
+#include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QShowEvent>
 
 #if _MSC_VER >= 1600
     #pragma execution_character_set("utf-8")
@@ -28,7 +30,8 @@
 
 MainWidget::MainWidget(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::MainWidget)
+    ui(new Ui::MainWidget),
+    m_recognition(new FaceRecognition(this))
 {
     ui->setupUi(this);
     this->initUI();
@@ -37,6 +40,16 @@ MainWidget::MainWidget(QWidget *parent) :
 MainWidget::~MainWidget()
 {
     delete ui;
+}
+
+void MainWidget::initRecognition()
+{
+    if(!m_recognition->load())
+    {
+        QMessageBox::critical(this, tr("Error"), tr("Model loading failed."));
+        this->close();              // it's working but program still RUN
+        QApplication::quit();       // it's not working
+    }
 }
 
 void MainWidget::initUI()
@@ -51,17 +64,17 @@ void MainWidget::on_photoBtn_clicked()
     if(fileName.isEmpty())
         return;
 
-    QImage image;
-    if((!image.load(fileName)) && image.isNull())
+    cv::Mat image = cv::imread(fileName.toLocal8Bit().toStdString());
+    if(image.empty())
     {
-        QMessageBox::critical(this,"错误","图片打开失败,请检查路径是否正确");
+        QMessageBox::critical(this, tr("Error"), tr("Can not open file."));
         return;
     }
 
-    m_ImageRecognitionDialog = new ImageRecognitionDialog(this);
+    m_ImageRecognitionDialog = new ImageRecognitionDialog(image, this);
     m_ImageRecognitionDialog->setWindowTitle(fileName);
     m_ImageRecognitionDialog->setAttribute(Qt::WA_DeleteOnClose);
-    m_ImageRecognitionDialog->setImage(image);
+    m_ImageRecognitionDialog->setRecognition(m_recognition);
     m_ImageRecognitionDialog->recognitionImage();
     m_ImageRecognitionDialog->exec();
     m_ImageRecognitionDialog = nullptr;
@@ -71,7 +84,8 @@ void MainWidget::on_cameraBtn_clicked()
 {
     m_VideoRecognitionDialog = new VideoRecognitionDialog(this);
     m_VideoRecognitionDialog->setAttribute(Qt::WA_DeleteOnClose);
-    m_VideoRecognitionDialog->openVideo(cv::CAP_ANY ,cv::CAP_DSHOW);
+    m_VideoRecognitionDialog->openVideo(cv::CAP_ANY, cv::CAP_DSHOW);
+    m_VideoRecognitionDialog->setRecognition(m_recognition);
     m_VideoRecognitionDialog->exec();
     m_VideoRecognitionDialog = nullptr;
 }
@@ -85,7 +99,8 @@ void MainWidget::on_videoBtn_clicked()
 
     m_VideoRecognitionDialog = new VideoRecognitionDialog(this);
     m_VideoRecognitionDialog->setAttribute(Qt::WA_DeleteOnClose);
-    m_VideoRecognitionDialog->openVideo(fileName.toStdString());
+    m_VideoRecognitionDialog->openVideo(fileName);
+    m_VideoRecognitionDialog->setRecognition(m_recognition);
     m_VideoRecognitionDialog->exec();
     m_VideoRecognitionDialog = nullptr;
 }

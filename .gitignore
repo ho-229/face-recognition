@@ -1,0 +1,4 @@
+﻿/build
+/faces
+*.pro.user*
+/opencv/build/x64/vc14/bin

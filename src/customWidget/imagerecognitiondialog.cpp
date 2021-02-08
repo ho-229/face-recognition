@@ -29,12 +29,10 @@
     #pragma execution_character_set("utf-8")
 #endif
 
-ImageRecognitionDialog::ImageRecognitionDialog(QWidget *parent) :
+ImageRecognitionDialog::ImageRecognitionDialog(cv::Mat& image, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ImageRecognitionDialog),
-    m_image(new QImage),
-    m_showImage(new QImage),
-    m_FaceRecognition(new FaceRecognition(this))
+    m_image(image)
 {
     ui->setupUi(this);
     this->initUI();
@@ -45,60 +43,29 @@ ImageRecognitionDialog::~ImageRecognitionDialog()
     delete ui;
 }
 
+void ImageRecognitionDialog::setRecognition(FaceRecognition *recongititon)
+{
+    m_FaceRecognition = recongititon;
+    ui->faceView->setRecognition(m_FaceRecognition);
+}
+
 void ImageRecognitionDialog::recognitionImage()
 {
-    m_FaceRecognition->setImage(*m_image);
-    if(!m_FaceRecognition->load())
-    {
-        QMessageBox::critical(this,"错误","模型加载失败");
-        return;
-    }
-    m_FaceRecognition->start();
-    m_faces = m_FaceRecognition->faces();
+    m_FaceRecognition->recognition(m_image);
+    VideoCapture::cvMatToImage(m_image, m_frame);
 
-    if(!m_faces.empty())
-    {
-        QPainter painter(m_showImage);
-
-        QPen pen;
-        pen.setWidth(3);
-
-        painter.setRenderHint(QPainter::Antialiasing);
-        painter.setFont(QFont("Microsoft YaHei",16,QFont::Bold));
-
-        std::size_t i = 1;
-        for(cv::Rect &face  : m_faces)
-        {
-            pen.setColor(Qt::red);
-            painter.setPen(pen);
-            painter.drawRect(face.x,face.y,face.width,face.height);
-
-            pen.setColor(QColor(69,198,214));
-            painter.setPen(pen);
-            painter.drawText(face.x,face.y-2,QString::number(i));
-
-            ++i;
-        }
-        painter.end();
-    }
-
-    if(m_showImage->size().width() > 1280)
-        ui->imageLabel->setPixmap(QPixmap::fromImage(*m_showImage).scaledToWidth(1680));
-    if(m_showImage->size().height() > 900)
-        ui->imageLabel->setPixmap(QPixmap::fromImage(*m_showImage).scaledToHeight(900));
-    else
-        ui->imageLabel->setPixmap(QPixmap::fromImage(*m_showImage));
-
-    ui->infoLabel->setText(QString("已识别人脸：%1").arg(m_faces.size()));
+    ui->faceView->setFrame(m_frame);
+    ui->infoLabel->setText(tr("faces: %1").arg(m_FaceRecognition->faces().size()));
 }
 
 void ImageRecognitionDialog::initUI()
 {
-    this->setWindowFlag(Qt::WindowContextHelpButtonHint,false);
+    this->setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 }
 
 void ImageRecognitionDialog::on_saveToLocalBtn_clicked()
 {
+    m_faces = m_FaceRecognition->faces();
     if(!m_faces.empty())
     {
         QDir facesDir("./faces/photo/");
@@ -108,9 +75,9 @@ void ImageRecognitionDialog::on_saveToLocalBtn_clicked()
         std::size_t i = 1;
         for(cv::Rect &face : m_faces)
         {
-            if(!m_image->copy(face.x,face.y,face.width,face.height)
-                    .save("./faces/photo/"+QString::number(i)+".jpg","JPG",100))
-                QMessageBox::critical(this,"错误",QString::number(i)+".jpg 保存失败");
+            if(!m_frame.copy(face.x, face.y, face.width, face.height)
+                    .save("./faces/photo/" + QString::number(i) + ".jpg","JPG",100))
+                QMessageBox::critical(this, "错误", QString::number(i) + ".jpg 保存失败");
             ++i;
         }
         QDesktopServices::openUrl(QUrl("file:./faces/photo/", QUrl::TolerantMode));

@@ -1,37 +1,46 @@
 ﻿#ifndef FACERECOGNITION_H
 #define FACERECOGNITION_H
 
-#include <QObject>
-#include <QImage>
+#include "videocapture.h"
+
 #include <vector>
 #include <opencv2/opencv.hpp>
 
 class FaceRecognition : public QObject
 {
     Q_OBJECT
+
 public:
     explicit FaceRecognition(QObject *parent = nullptr);
-    ~FaceRecognition();
-
-    void setImage(const cv::Mat &image) { m_image = image; }
-    void setImage(const QImage  &image) { m_image = ImageTocvMat(image); }
+    ~FaceRecognition() ;
 
     bool load() const;
-    void start();
 
-    std::vector<cv::Rect> faces() const { return m_faces; }
+    const std::vector<cv::Rect>& faces(){ return m_faces; }
 
-    static QImage cvMatToImage(const cv::Mat& mat);
-    static cv::Mat ImageTocvMat(const QImage &image);
+    cv::Mat& frame(){ return m_frame; }
 
-signals:
-    void recognitionFinished(std::vector<cv::Rect> );
+    void setVideoCapture(VideoCapture *capture)
+    {
+        if(capture == nullptr)
+            return;
+
+        m_capture = capture;
+    }
+
+    void recognition(const cv::Mat& frame)
+    {
+        m_frame = frame;
+        this->recognition();
+    }
+
+    void recognition();
 
 private:
-    cv::Mat m_image;
-    cv::Mat m_grayImage;
+    VideoCapture *m_capture = nullptr;
     cv::CascadeClassifier *m_cascada = nullptr;
 
+    cv::Mat m_frame;
     std::vector<cv::Rect> m_faces;
 };
 

@@ -19,14 +19,10 @@
 #include "mainwidget.h"
 
 #include <QApplication>
-#include <QTextCodec>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-
-    QTextCodec::setCodecForLocale(
-                QTextCodec::codecForName("UTF-8"));
 
 #ifdef Q_OS_WIN
     a.setFont(QFont("Microsoft YaHei",9));
@@ -34,6 +30,7 @@ int main(int argc, char *argv[])
 
     MainWidget w;
     w.show();
+    w.initRecognition();
 
     return a.exec();
 }

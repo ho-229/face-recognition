@@ -22,7 +22,7 @@
 # with this program; If not, see <http://www.gnu.org/licenses/>.
 # ========================================================================
 
-QT       += core gui multimedia multimediawidgets
+QT       += core gui multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 

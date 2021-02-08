@@ -2,6 +2,7 @@
 #define IMAGERECOGNITIONDIALOG_H
 
 #include <QDialog>
+#include <opencv2/opencv.hpp>
 
 #include "facerecognition.h"
 
@@ -16,14 +17,10 @@ class ImageRecognitionDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit ImageRecognitionDialog(QWidget *parent = nullptr);
+    explicit ImageRecognitionDialog(cv::Mat& image, QWidget *parent = nullptr);
     ~ImageRecognitionDialog();
 
-    void setImage(const QImage &image)
-    {
-        *m_image     = image;
-        *m_showImage = image;
-    }
+    void setRecognition(FaceRecognition *recongititon);
 
     void recognitionImage();
 
@@ -33,8 +30,8 @@ private slots:
 private:
     Ui::ImageRecognitionDialog *ui;
 
-    QImage *m_image     = nullptr;
-    QImage *m_showImage = nullptr;
+    cv::Mat& m_image;
+    QImage m_frame;
 
     FaceRecognition *m_FaceRecognition = nullptr;
 

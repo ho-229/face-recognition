@@ -30,11 +30,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QLabel" name="frameLabel">
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
+    <widget class="FaceView" name="faceView" native="true"/>
    </item>
    <item>
     <widget class="QWidget" name="widget" native="true">
@@ -110,6 +106,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>FaceView</class>
+   <extends>QWidget</extends>
+   <header location="global">faceview.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

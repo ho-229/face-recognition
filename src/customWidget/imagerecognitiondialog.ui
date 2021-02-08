@@ -6,14 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>619</width>
-    <height>531</height>
+    <width>785</width>
+    <height>552</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>400</width>
+    <height>300</height>
+   </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>1000</width>
-    <height>1000</height>
+    <width>16777215</width>
+    <height>16777215</height>
    </size>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
@@ -33,9 +39,12 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QLabel" name="imageLabel">
-     <property name="text">
-      <string/>
+    <widget class="FaceView" name="faceView" native="true">
+     <property name="baseSize">
+      <size>
+       <width>600</width>
+       <height>450</height>
+      </size>
      </property>
     </widget>
    </item>
@@ -131,6 +140,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>FaceView</class>
+   <extends>QWidget</extends>
+   <header location="global">faceview.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

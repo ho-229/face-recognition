@@ -17,13 +17,11 @@
  ======================================================================== */
 
 #include "videorecognitiondialog.h"
-#include "ui_camerarecognitiondialog.h"
+#include "ui_videorecognitiondialog.h"
 
 #include <QDebug>
 #include <QUrl>
 #include <QDir>
-#include <QTimer>
-#include <QPainter>
 #include <QCameraInfo>
 #include <QMessageBox>
 #include <QDesktopServices>
@@ -35,22 +33,17 @@
 VideoRecognitionDialog::VideoRecognitionDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::CameraRecognitionDialog),
-    m_Timer(new QTimer(this)),
-    m_FaceRecognition(new FaceRecognition(this))
+    m_capture(new VideoCapture(this))
 {
     ui->setupUi(this);
     this->initUI();
 
-    if(!m_FaceRecognition->load())
-    {
-        QMessageBox::critical(this,"错误","模型加载失败");
-        this->close();
-        return;
-    }
+    ui->faceView->setVideoCapture(m_capture);
 
-    m_pen.setWidth(3);
-
-    connect(m_Timer,&QTimer::timeout,this,&VideoRecognitionDialog::processFrame);
+    QObject::connect(ui->faceView, &FaceView::findFaces,
+                     [this](size_t num){
+        ui->infoLabel->setText(tr("faces: ").append(QString::number(num)));
+    });
 }
 
 VideoRecognitionDialog::~VideoRecognitionDialog()
@@ -58,85 +51,47 @@ VideoRecognitionDialog::~VideoRecognitionDialog()
     delete ui;
 }
 
-void VideoRecognitionDialog::openVideo(const cv::String &filename, int apiPreference)
+void VideoRecognitionDialog::openVideo(const QString &filename, int apiPreference)
 {
-    qDebug()<<filename.c_str();
-    if(!m_videoCapture.open(filename ,apiPreference))
+    if(!m_capture->start(filename, apiPreference))
     {
-        QMessageBox::critical(this,"错误","视频文件加载失败");
+        QMessageBox::critical(this, "错误", "视频文件加载失败");
         this->close();
         return;
     }
-    this->setWindowTitle(filename.c_str());
-    m_Timer->start(100);
+    this->setWindowTitle(filename);
 }
 
 void VideoRecognitionDialog::openVideo(int index, int apiPreference)
 {
-    if(!m_videoCapture.open(index ,apiPreference))
+    if(!m_capture->start(index ,apiPreference))
     {
         QMessageBox::critical(this,"错误","摄像头加载失败");
         this->close();
         return;
     }
     this->setWindowTitle("摄像头 - " + QCameraInfo::defaultCamera().description());
-    m_Timer->start(100);
 }
 
-void VideoRecognitionDialog::processFrame()
+void VideoRecognitionDialog::setRecognition(FaceRecognition *recongititon)
 {
-    m_videoCapture >> m_frame;             // 读取帧
-    if(!m_frame.empty())
-    {
-        m_FaceRecognition->setImage(m_frame);
-        m_FaceRecognition->start();         // 开始识别
-        m_faces = m_FaceRecognition->faces();
-        m_imageFrame = FaceRecognition::cvMatToImage(m_frame);
-
-        QCoreApplication::processEvents();  // 防止GUI冻结
-
-        if(!m_faces.empty())
-        {
-            /* 绘制矩形 */
-            QPainter painter(&m_imageFrame);
-
-            painter.setRenderHint(QPainter::Antialiasing);
-            painter.setFont(QFont("Microsoft YaHei",18,QFont::Bold));
-
-            std::size_t i = 1;
-            for(cv::Rect &face : m_faces)
-            {
-                m_pen.setColor(Qt::red);
-                painter.setPen(m_pen);
-                painter.drawRect(face.x,face.y,face.width,face.height);
-
-                m_pen.setColor(Qt::blue);
-                painter.setPen(m_pen);
-                painter.drawText(face.x,face.y-2,QString::number(i));
-
-                ++i;
-            }
-            painter.end();
-        }
-        ui->infoLabel->setText(QString("已识别人脸：%1").arg(m_faces.size()));
-        ui->frameLabel->setPixmap(QPixmap::fromImage(m_imageFrame));
-    }
+    m_FaceRecognition = recongititon;
+    ui->faceView->setRecognition(m_FaceRecognition);
 }
 
 void VideoRecognitionDialog::initUI()
 {
     this->setWindowFlag(Qt::WindowContextHelpButtonHint,false);
-    this->setWindowFlag(Qt::MSWindowsFixedSizeDialogHint);
 }
 
 void VideoRecognitionDialog::closeEvent(QCloseEvent *)
 {
-    m_Timer->stop();            // 停止QTimer
-    m_videoCapture.release();   // 关闭摄像头
+    m_capture->stop();
 }
 
 void VideoRecognitionDialog::on_saveToLocalBtn_clicked()
 {
+    m_faces = m_FaceRecognition->faces();
     if(!m_faces.empty())
     {
         QDir facesDir("./faces/camera/");
@@ -147,9 +102,9 @@ void VideoRecognitionDialog::on_saveToLocalBtn_clicked()
         for(cv::Rect &face : m_faces)
         {
             /* 裁剪并保存 */
-            if(!m_imageFrame.copy(face.x + 3,face.y + 3,face.width - 6,face.height - 6)
-                    .save("./faces/camera/"+QString::number(i)+".jpg","JPG",100))
-                QMessageBox::critical(this,"错误",QString::number(i)+".jpg 保存失败");
+            if(!ui->faceView->frame().copy(face.x + 3, face.y + 3, face.width - 6, face.height - 6)
+                    .save("./faces/camera/" + QString::number(i) +  ".jpg", "JPG", 100))
+                QMessageBox::critical(this,"错误",QString::number(i) + ".jpg 保存失败");
             ++i;
         }
         // 用资源管理器打开
