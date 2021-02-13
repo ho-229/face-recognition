@@ -1,8 +1,8 @@
 # Face-Recognition
 ### 开发环境
-* IDE：Qt Creator 4.11.1<br>
-* Qt Version：Qt 5.14.2
-* Compiler：Microsoft Visual C++ 2017（x64）<br>
+* IDE：Qt Creator 4.14.0<br>
+* Qt Version：Qt 5.15.2
+* Compiler：Microsoft Visual C++ 2019（x64）<br>
 * OpenCV：OpenCV 4.2
 ---------
 ### 项目介绍 
@@ -19,5 +19,4 @@
 * `haarcascade_frontalface_alt.xml` 和 `haarcascade_frontalface_alt2.xml` 都是官方训练好的模型，demo中默认使用第一个，可以根据自己需要更换。
 ---------
 ### 关于作者
-* QQ：2189684957<br>
-* E-mail：2189684957@qq.com<br>
+* E-mail：<ho229v3666@gmail.com>

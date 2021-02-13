@@ -19,7 +19,7 @@ class MainWidget : public QWidget
 
 public:
     explicit MainWidget(QWidget *parent = nullptr);
-    ~MainWidget();
+    ~MainWidget() Q_DECL_OVERRIDE;
 
     void initRecognition();
 
@@ -29,7 +29,6 @@ private slots:
     void on_cameraBtn_clicked();
 
     void on_photoBtn_clicked();
-
 
     void on_videoBtn_clicked();
 
